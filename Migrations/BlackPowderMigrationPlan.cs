@@ -57,6 +57,7 @@ public class BlackPowderMigrationPlan : MigrationPlan
     {
         From(string.Empty)
             .To<CreateBlackPowderDocumentTypesMigration>("black-powder-1.0.0")
-            .To<UpdateBlackPowderDocumentTypesMigration>("black-powder-2.0.0");
+            .To<UpdateBlackPowderDocumentTypesMigration>("black-powder-2.0.0")
+            .To<UpdateUnitDataModelMigration>("black-powder-3.0.0");
     }
 }
