@@ -1,0 +1,398 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    Layout = null;
+    var pageTitle = Model?.Value<string>("pageTitle") ?? "Black Powder Army Builder";
+    var pageDescription = Model?.Value<string>("pageDescription") ?? "Build and manage your Black Powder armies";
+
+    var units = Model?.Children?.Where(x => x.ContentType.Alias == "blackPowderUnit").ToList() ?? new List<IPublishedContent>();
+    var armies = Model?.Children?.Where(x => x.ContentType.Alias == "blackPowderArmy").ToList() ?? new List<IPublishedContent>();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@pageTitle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #495057;
+            transition: all 0.3s;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .unit-card {
+            border-left: 4px solid #667eea;
+        }
+
+        .army-card {
+            border-left: 4px solid #f093fb;
+        }
+
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .stat {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .badge-infantry { background: #e3f2fd; color: #1565c0; }
+        .badge-cavalry { background: #f3e5f5; color: #6a1b9a; }
+        .badge-artillery { background: #ffebee; color: #c62828; }
+        .badge-size { background: #e8f5e9; color: #2e7d32; }
+        .badge-points { background: #fff3e0; color: #e65100; }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .special-rules {
+            background: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+
+        .special-rules h4 {
+            color: #f57c00;
+            margin-bottom: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>@pageTitle</h1>
+            <p>@pageDescription</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('units')">Units Library</button>
+            <button class="nav-tab" onclick="switchTab('armies')">My Armies</button>
+            <button class="nav-tab" onclick="switchTab('builder')">Army Builder</button>
+        </div>
+
+        <div class="content">
+            <div id="units-tab" class="tab-content active">
+                <h2 style="margin-bottom: 20px;">Available Units</h2>
+                @if (units.Any())
+                {
+                    <div class="grid">
+                        @foreach (var unit in units)
+                        {
+                            var unitName = unit.Value<string>("unitName");
+
+                            // Get the Unit Type content picker reference
+                            var unitTypeNode = unit.Value<IPublishedContent>("unitType");
+                            var unitTypeName = unitTypeNode?.Value<string>("unitType") ?? "Unknown";
+                            var unitTypeDescription = unitTypeNode?.Value<string>("description") ?? "";
+
+                            var unitSize = unit.Value<string>("unitSize");
+                            var pointsCost = unit.Value<int>("pointsCost");
+                            var clash = unit.Value<int>("clash");
+                            var sustainedFire = unit.Value<int>("sustainedFire");
+                            var shortRangeFire = unit.Value<int>("shortRangeFire");
+                            var longRangeFire = unit.Value<int>("longRangeFire");
+                            var moraleSave = unit.Value<int>("moraleSave");
+                            var stamina = unit.Value<int>("stamina");
+                            var specialRules = unit.Value<string>("specialRules");
+                            var description = unit.Value<string>("description");
+
+                            <div class="card unit-card">
+                                <h3>@unitName</h3>
+                                <div>
+                                    <span class="badge badge-@(unitTypeName?.ToLower() ?? "infantry")">@unitTypeName</span>
+                                    <span class="badge badge-size">@unitSize</span>
+                                    <span class="badge badge-points">@pointsCost pts</span>
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(description))
+                                {
+                                    <p style="margin: 15px 0; color: #6c757d;">@description</p>
+                                }
+
+                                <div class="stat-grid">
+                                    <div class="stat">
+                                        <div class="stat-label">Clash</div>
+                                        <div class="stat-value">@clash</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="stat-label">Sustained Fire</div>
+                                        <div class="stat-value">@sustainedFire</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="stat-label">Short Range</div>
+                                        <div class="stat-value">@shortRangeFire</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="stat-label">Long Range</div>
+                                        <div class="stat-value">@longRangeFire</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="stat-label">Morale Save</div>
+                                        <div class="stat-value">@moraleSave+</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="stat-label">Stamina</div>
+                                        <div class="stat-value">@stamina</div>
+                                    </div>
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(specialRules))
+                                {
+                                    <div class="special-rules">
+                                        <h4>Special Rules</h4>
+                                        <p>@specialRules</p>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <div style="font-size: 4em; margin-bottom: 20px;">⚔️</div>
+                        <h3>No units available</h3>
+                        <p>Add units through the Umbraco backoffice to build your army.</p>
+                    </div>
+                }
+            </div>
+
+            <div id="armies-tab" class="tab-content">
+                <h2 style="margin-bottom: 20px;">My Armies</h2>
+                @if (armies.Any())
+                {
+                    <div class="grid">
+                        @foreach (var army in armies)
+                        {
+                            var armyName = army.Value<string>("armyName");
+                            var faction = army.Value<string>("faction");
+                            var period = army.Value<string>("period");
+                            var targetPoints = army.Value<int>("targetPoints");
+
+                            <div class="card army-card">
+                                <h3>@armyName</h3>
+                                <div>
+                                    <span class="badge badge-infantry">@faction</span>
+                                    @if (!string.IsNullOrWhiteSpace(period))
+                                    {
+                                        <span class="badge badge-cavalry">@period</span>
+                                    }
+                                    <span class="badge badge-points">Target: @targetPoints pts</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <div style="font-size: 4em; margin-bottom: 20px;">🚩</div>
+                        <h3>No armies created yet</h3>
+                        <p>Use the Army Builder to create your first army.</p>
+                    </div>
+                }
+            </div>
+
+            <div id="builder-tab" class="tab-content">
+                <h2 style="margin-bottom: 20px;">Army Builder</h2>
+                <div class="empty-state">
+                    <div style="font-size: 4em; margin-bottom: 20px;">🛠️</div>
+                    <h3>Army Builder Coming Soon</h3>
+                    <p>Interactive army builder interface will be added here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/army-builder.js"></script>
+    <script>
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remove active from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+
+            // Activate corresponding nav tab
+            event.target.classList.add('active');
+
+            // Initialize army builder when switching to builder tab
+            if (tabName === 'builder' && typeof armyBuilder === 'undefined') {
+                armyBuilder = new ArmyBuilder();
+            }
+        }
+    </script>
+</body>
+</html>

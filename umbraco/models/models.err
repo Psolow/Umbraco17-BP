@@ -1,0 +1,8 @@
+Failed to build Live models.
+The model class for content type with alias "unitType" is named "UnitType". CSharp does not support using the same name for the property with alias "unitType". Consider using an attribute to assign a different name to the property.
+
+   at Umbraco.Cms.Infrastructure.ModelsBuilder.Building.Builder.Prepare()
+   at Umbraco.Cms.Infrastructure.ModelsBuilder.Building.Builder..ctor(ModelsBuilderSettings config, IList`1 typeModels)
+   at Umbraco.Cms.Infrastructure.ModelsBuilder.Building.TextBuilder..ctor(ModelsBuilderSettings config, IList`1 typeModels)
+   at Umbraco.Cms.Infrastructure.ModelsBuilder.Building.ModelsGenerator.GenerateModels()
+   at Umbraco.Cms.Infrastructure.ModelsBuilder.AutoModelsNotificationHandler.GenerateModelsIfRequested()
